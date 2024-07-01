@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  dev:
+    image: racascao/python_for_ia:0.1
+    volumes:
+      - .:/workspace
+    environment:
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "8000:8000"
+    user: developer
+    command: bash -c "python app.py"
+    networks:
+      - langgraph-net
+
+  ollama:
+    volumes:
+      - langgraph-ollama:/root/.ollama
+    container_name: langgraph-ollama
+    pull_policy: always
+    tty: true
+    restart: unless-stopped
+    image: ollama/ollama:latest
+    ports:
+      - 11430:11434
+    networks:
+      - langgraph-net
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+volumes:
+  langgraph-ollama:
+
+networks:
+  langgraph-net:
+    driver: bridge
